@@ -1,62 +1,42 @@
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Scanner;
-
 public class Main {
-    private static void copyFileUsingJava7Files(File source, File dest){
-        try{
-            Files.copy(source.toPath(), dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException ex){
-            System.out.println(ex.getMessage());
-        }
+    private static void copyFileUsingJava7Files(File source, File dest) throws IOException{
+        Files.copy(source.toPath(), dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
-    private static void copyFileUsingStream(File source,File dest){
-        FileInputStream fileInputStream = null;
-        FileOutputStream fileOutputStream = null;
-        byte[] buffer;
-        int length;
+    private static void copyFileUsingStream(File source, File dest) throws IOException{
+        InputStream is = null;
+        OutputStream os = null;
         try {
-            fileInputStream = new FileInputStream(source);
-            fileOutputStream = new FileOutputStream(dest);
-            buffer = new byte[1024];
-            while ((length = fileInputStream.read(buffer)) != -1){
-                fileOutputStream.write(buffer, 0, length);
+            is = new FileInputStream(source);
+            os = new FileOutputStream(dest);
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = is.read(buffer)) > 0){
+                os.write(buffer, 0, length);
             }
-        }catch (IOException ex){
-            System.out.println(ex.getMessage());
         }finally {
-            try{
-                fileInputStream.close();
-            } catch (IOException ex){
-                System.out.println(ex.getMessage());
-            }
-            try {
-                fileOutputStream.close();
-            } catch (IOException ex){
-                System.out.println(ex.getMessage());
-            }
+            is.close();
+            os.close();
         }
     }
+
     public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        System.out.println("Enter source life: ");
-        String sourcePath = sc.nextLine();
-        System.out.println("Enter destination life: ");
-        String destPath = sc.nextLine();
+        Scanner scanner = new Scanner(System.in);
+        System.out.printf("Enter source file: ");
+        String sourcePath = scanner.nextLine();
+        System.out.printf("Enter destination file: ");
+        String destPath = scanner.nextLine();
         File sourceFile = new File(sourcePath);
         File destFile = new File(destPath);
-        long startTime = System.nanoTime();
-        copyFileUsingStream(sourceFile, destFile);
-        long endTime = System.nanoTime();
-        System.out.println("Time: "+ (endTime - startTime));
-        System.out.println();
-        startTime = System.nanoTime();
-        copyFileUsingJava7Files(sourceFile, destFile);
-        endTime = System.nanoTime();
-        System.out.println("Time: " + (endTime - startTime));
+        try {
+            copyFileUsingJava7Files(sourceFile,destFile);
+            System.out.printf("Copy completed");
+        }catch (IOException ioe){
+            System.out.printf("Can't copy that file");
+            System.out.printf(ioe.getMessage());
+        }
     }
 }
